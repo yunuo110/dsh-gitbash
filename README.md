@@ -2,7 +2,7 @@
 
 DeepSeek Harness（DSH）bundle 插件：**不新增模式、不新增工具**，在 Windows 上把 DSH 现有的 `bash` 工具直接指向 Git for Windows Bash，并隐藏/禁用 `pwsh`，让模型自然使用 Git Bash。
 
-这个方案参考了 Reasonix 的做法：**只保留一个 `bash` 工具**，省掉额外工具 schema 和额外系统提示，token 更省。
+参考了 Reasonix 的做法。
 
 ## 设计目标
 
@@ -145,6 +145,6 @@ npm run check
 - Windows + Git for Windows（MSYS2）
 - Node.js 22.19+
 
-## 致谢
+## 说明
 
-实现参考了 Reasonix 的 `internal/sandbox/shell.go` 设计（单 bash 工具 + 运行时解析 Git Bash），以及 [MAXeaglet/dsh-bash-terminal](https://github.com/MAXeaglet/dsh-bash-terminal) 与 [liceses/dsh-gitbash-preset](https://github.com/liceses/dsh-gitbash-preset) 的 DSH 工具接缝经验。本项目 MIT License。
+本工具完全由 DSH 制作而成。
