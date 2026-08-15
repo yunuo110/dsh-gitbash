@@ -49,6 +49,31 @@ dsh plugin --profile web add .
 & 'F:\code\creative-tools\caches\npm\_npx\1e7f6d9597241db0\node_modules\.bin\dsh.cmd' plugin --profile web add .
 ```
 
+### GitHub 安装（推荐，避免被 DSH 更新/本地路径变动刷掉）
+
+先把本仓库推到 GitHub：
+
+```bash
+git remote add origin https://github.com/<your-name>/dsh-gitbash.git
+git branch -M main
+git push -u origin main
+```
+
+然后安装：
+
+```powershell
+dsh plugin --profile web remove dsh-gitbash
+dsh plugin --profile web add github:<your-name>/dsh-gitbash
+```
+
+建议锁定 commit，避免以后仓库变更悄悄影响你：
+
+```powershell
+dsh plugin --profile web add github:<your-name>/dsh-gitbash#<commit-sha>
+```
+
+这样 profile 里保存的是 GitHub 依赖，而不是本地 `link:F:/code/...`，DSH 更新不会把它刷掉。
+
 ## 使用
 
 - 新会话或旧对话里让模型执行 shell/git 命令，例如“查看 git 状态”“运行 npm test”。
