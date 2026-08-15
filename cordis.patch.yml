@@ -1,0 +1,37 @@
+# dsh-gitbash bundle layer (Reasonix-style refactor).
+#
+# On Windows:
+#   - dsh-gitbash provides the `ctx.shell` seam with a Git-for-Windows bash
+#     executor;
+#   - the existing host `tool-bash` is re-enabled so every session sees the
+#     normal `bash` tool (no extra gitbash tool schema);
+#   - `pwsh-sandbox` and `tool-pwsh` are disabled so PowerShell is not used.
+#
+# On non-Windows the dsh-gitbash plugin no-ops, and the host bash tool remains
+# unchanged.
+- insert:
+    - id: dsh-gitbash
+      name: dsh-gitbash
+      config:
+        # Leave shellPath empty for auto-detection:
+        #   GIT_BASH -> Program Files -> LocalAppData -> Scoop -> PATH.
+        # To pin a path: shellPath: 'C:\\Program Files\\Git\\bin\\bash.exe'
+        shellPath: ''
+        timeoutMs: 120000
+        maxTimeoutMs: 600000
+        maxOutputBytes: 64000
+        maxSpillBytes: 67108864
+        graceMs: 3000
+
+# Re-enable the host bash tool on Windows so the single existing `bash` tool
+# is the model-facing shell. On non-Windows this is already enabled.
+- id: tool-bash
+  disabled: false
+
+# Disable the PowerShell executor and model-facing pwsh tool everywhere. This
+# is safe on non-Windows too because those rows were already disabled there.
+- id: pwsh-sandbox
+  disabled: true
+
+- id: tool-pwsh
+  disabled: true

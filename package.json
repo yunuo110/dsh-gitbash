@@ -1,0 +1,42 @@
+{
+  "name": "dsh-gitbash",
+  "version": "0.1.0",
+  "private": false,
+  "description": "DeepSeek Harness bundle plugin: makes the existing bash tool run Git Bash on Windows and disables pwsh (Reasonix-style, token-frugal)",
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "plugin",
+    "git-bash",
+    "windows",
+    "bash"
+  ],
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "scripts": {
+    "test": "node --test",
+    "check": "node --check lib/index.js && node --check lib/gitbash-core.mjs && node --test"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}
