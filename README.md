@@ -28,13 +28,51 @@ dsh-gitbash/
 
 ## 安装（web profile）
 
-在插件仓库根目录执行：
+先进入插件目录：
+
+```powershell
+cd F:\code\dsh-gitbash-preset
+```
+
+### 方式 A：`dsh` 已经在 PATH 里
+
+直接执行：
 
 ```powershell
 dsh plugin --profile web add .
 ```
 
-这会：
+### 方式 B：平时用 `npx @deepseek-ai/dsh web` 启动 DSH
+
+很多人的 DSH 不是全局安装的，`dsh` 命令并不在 PATH 里。如果你平时是这样启动的：
+
+```powershell
+npx @deepseek-ai/dsh web
+```
+
+那么安装插件也要通过 `npx` 调用：
+
+```powershell
+npx @deepseek-ai/dsh plugin --profile web add .
+```
+
+注意：这条命令要在插件目录 `F:\code\dsh-gitbash-preset` 下执行，因为 `add .` 的 `.` 指向当前目录。
+
+如果你希望以后能直接使用 `dsh` 命令，可以先把 DSH 装到全局：
+
+```powershell
+npm install -g @deepseek-ai/dsh
+```
+
+之后就能直接：
+
+```powershell
+dsh plugin --profile web add .
+```
+
+### 安装后
+
+安装会：
 
 1. 把 `dsh-gitbash` 作为 bundle 加入 `~/.dsh/profiles/web`；
 2. 在 Windows 上提供一个 Git Bash `shell` executor；
@@ -42,12 +80,6 @@ dsh plugin --profile web add .
 4. 禁用 `pwsh-sandbox` / `tool-pwsh`。
 
 然后**完整重启 DSH**。之后新建会话和旧对话都会使用同一个 `bash` 工具，但它实际执行 Git Bash。
-
-如果 `dsh` 不在 PATH，使用你的实际路径，例如：
-
-```powershell
-& 'F:\code\creative-tools\caches\npm\_npx\1e7f6d9597241db0\node_modules\.bin\dsh.cmd' plugin --profile web add .
-```
 
 ### GitHub 安装（推荐，避免被 DSH 更新/本地路径变动刷掉）
 
@@ -126,10 +158,12 @@ dsh plugin --profile web add github:<your-name>/dsh-gitbash#<commit-sha>
 
 ## Token 对比
 
-| 方案 | 工具数量 | 额外系统提示 | 每轮 token |
+只对比原版 DSH 配置与本插件的差异：
+
+| 配置 | 可见 shell 工具 | 额外系统提示 | 每轮 token 影响 |
 | --- | --- | --- | --- |
-| 之前：新增 `gitbash` 工具 | 2（pwsh + gitbash 或 bash + gitbash） | 有 | 较高 |
-| 现在：Reasonix 式单一 `bash` 工具 | 1（bash） | 无 | 更低 |
+| 原版 DSH（Windows） | `pwsh` | 无 | 基准 |
+| 本插件 | `bash`（实际执行 Git Bash） | 无 | 基本持平（只是用 `bash` schema 替换 `pwsh` schema，没有新增额外工具） |
 
 ## 测试
 
