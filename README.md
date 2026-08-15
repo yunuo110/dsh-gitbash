@@ -96,10 +96,10 @@ dsh plugin --profile web remove dsh-gitbash
 dsh plugin --profile web add github:yunuo110/dsh-gitbash
 ```
 
-建议锁定 commit，避免以后仓库变更悄悄影响你：
+建议锁定版本，避免以后仓库变更悄悄影响你（当前最新 tag：`v0.1.0`）：
 
 ```powershell
-dsh plugin --profile web add github:yunuo110/dsh-gitbash#<commit-sha>
+dsh plugin --profile web add github:yunuo110/dsh-gitbash#v0.1.0
 ```
 
 这样 profile 里保存的是 GitHub 依赖，而不是本地 `link` 依赖，DSH 更新不会把它刷掉。
