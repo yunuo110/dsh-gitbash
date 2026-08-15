@@ -1,5 +1,7 @@
 # dsh-gitbash
 
+[English](./README.en.md) · 中文
+
 DeepSeek Harness（DSH）bundle 插件：**不新增模式、不新增工具**，在 Windows 上把 DSH 现有的 `bash` 工具直接指向 Git for Windows Bash，并隐藏/禁用 `pwsh`，让模型自然使用 Git Bash。
 
 参考了 Reasonix 的做法。
