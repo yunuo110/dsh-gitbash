@@ -28,10 +28,10 @@ dsh-gitbash/
 
 ## 安装（web profile）
 
-先进入插件目录：
+在插件仓库根目录执行。如果你是从 GitHub clone 的，先进入 clone 出来的目录：
 
 ```powershell
-cd F:\code\dsh-gitbash-preset
+cd dsh-gitbash
 ```
 
 ### 方式 A：`dsh` 已经在 PATH 里
@@ -56,7 +56,7 @@ npx @deepseek-ai/dsh web
 npx @deepseek-ai/dsh plugin --profile web add .
 ```
 
-注意：这条命令要在插件目录 `F:\code\dsh-gitbash-preset` 下执行，因为 `add .` 的 `.` 指向当前目录。
+注意：这条命令要在插件仓库根目录下执行，因为 `add .` 的 `.` 指向当前目录。
 
 如果你希望以后能直接使用 `dsh` 命令，可以先把 DSH 装到全局：
 
@@ -81,30 +81,28 @@ dsh plugin --profile web add .
 
 然后**完整重启 DSH**。之后新建会话和旧对话都会使用同一个 `bash` 工具，但它实际执行 Git Bash。
 
-### GitHub 安装（推荐，避免被 DSH 更新/本地路径变动刷掉）
+### GitHub 安装（推荐）
 
-先把本仓库推到 GitHub：
+如果你不想依赖本地源码目录，可以直接从 GitHub 安装：
 
-```bash
-git remote add origin https://github.com/<your-name>/dsh-gitbash.git
-git branch -M main
-git push -u origin main
+```powershell
+dsh plugin --profile web add github:yunuo110/dsh-gitbash
 ```
 
-然后安装：
+如果你之前装过本地版本，先移除再安装：
 
 ```powershell
 dsh plugin --profile web remove dsh-gitbash
-dsh plugin --profile web add github:<your-name>/dsh-gitbash
+dsh plugin --profile web add github:yunuo110/dsh-gitbash
 ```
 
 建议锁定 commit，避免以后仓库变更悄悄影响你：
 
 ```powershell
-dsh plugin --profile web add github:<your-name>/dsh-gitbash#<commit-sha>
+dsh plugin --profile web add github:yunuo110/dsh-gitbash#<commit-sha>
 ```
 
-这样 profile 里保存的是 GitHub 依赖，而不是本地 `link:F:/code/...`，DSH 更新不会把它刷掉。
+这样 profile 里保存的是 GitHub 依赖，而不是本地 `link` 依赖，DSH 更新不会把它刷掉。
 
 ## 使用
 
