@@ -36,6 +36,8 @@ dsh-gitbash/
 cd dsh-gitbash
 ```
 
+> 新版 DSH 的 `dsh plugin` 命令会把参数转发给 `pnpm`。安装前请先确认本机已有 `pnpm`（例如执行 `pnpm --version`）；没有的话先运行 `npm install -g pnpm`。
+
 ### 方式 A：`dsh` 已经在 PATH 里
 
 直接执行：
@@ -98,10 +100,10 @@ dsh plugin --profile web remove dsh-gitbash
 dsh plugin --profile web add github:yunuo110/dsh-gitbash
 ```
 
-建议锁定版本，避免以后仓库变更悄悄影响你（当前最新 tag：`v0.1.0`）：
+建议锁定版本，避免以后仓库变更悄悄影响你（当前最新 tag：`v0.1.1`）：
 
 ```powershell
-dsh plugin --profile web add github:yunuo110/dsh-gitbash#v0.1.0
+dsh plugin --profile web add github:yunuo110/dsh-gitbash#v0.1.1
 ```
 
 这样 profile 里保存的是 GitHub 依赖，而不是本地 `link` 依赖，DSH 更新不会把它刷掉。
@@ -175,7 +177,7 @@ npm run check
 
 ## 兼容性
 
-- DeepSeek Harness `0.1.0-rc.6`
+- DeepSeek Harness `0.1.2-rc.1`（兼容 `0.1.0-rc.6` 起的同一套 shell/工具 seam）
 - Windows + Git for Windows（MSYS2）
 - Node.js 22.19+
 

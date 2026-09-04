@@ -36,6 +36,8 @@ Run from the plugin repository root. If you cloned from GitHub, enter the cloned
 cd dsh-gitbash
 ```
 
+> The current `dsh plugin` command forwards its remaining arguments to `pnpm`. Before installing, make sure `pnpm` is available (e.g. run `pnpm --version`); if not, install it with `npm install -g pnpm`.
+
 ### Option A: `dsh` is already on PATH
 
 ```powershell
@@ -96,10 +98,10 @@ dsh plugin --profile web remove dsh-gitbash
 dsh plugin --profile web add github:yunuo110/dsh-gitbash
 ```
 
-It is recommended to pin a version so future repository changes do not silently affect you (current latest tag: `v0.1.0`):
+It is recommended to pin a version so future repository changes do not silently affect you (current latest tag: `v0.1.1`):
 
 ```powershell
-dsh plugin --profile web add github:yunuo110/dsh-gitbash#v0.1.0
+dsh plugin --profile web add github:yunuo110/dsh-gitbash#v0.1.1
 ```
 
 This keeps a GitHub dependency in the profile instead of a local `link` dependency, so DSH updates will not wipe it.
@@ -173,7 +175,7 @@ Current tests cover: Git Bash path detection, argv construction, environment mer
 
 ## Compatibility
 
-- DeepSeek Harness `0.1.0-rc.6`
+- DeepSeek Harness `0.1.2-rc.1` (compatible with the same shell/tool seams since `0.1.0-rc.6`)
 - Windows + Git for Windows (MSYS2)
 - Node.js 22.19+
 

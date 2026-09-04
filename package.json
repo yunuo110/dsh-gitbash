@@ -1,6 +1,6 @@
 {
   "name": "dsh-gitbash",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": false,
   "description": "DeepSeek Harness bundle plugin: makes the existing bash tool run Git Bash on Windows and disables pwsh (Reasonix-style, token-frugal)",
   "keywords": [
