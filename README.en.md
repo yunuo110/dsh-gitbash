@@ -124,7 +124,7 @@ This keeps a GitHub dependency in the profile instead of a local `link` dependen
 
 ## Configuration
 
-By default Git Bash is auto-detected from: `GIT_BASH` env var → Program Files / Program Files (x86) / ProgramW6432 / LocalAppData / Scoop → PATH (excluding the System32 WSL bash).
+By default Git Bash is auto-detected from: `GIT_BASH` env var → registry `HKLM\SOFTWARE\GitForWindows\InstallPath` → Program Files / Program Files (x86) / ProgramW6432 / LocalAppData / Scoop → PATH (including deriving `<...>\bin\bash.exe` from a `<...>\cmd` entry; the System32 WSL bash is excluded). If nothing is found the plugin fails loudly instead of falling back to a bare `bash`.
 
 To pin a path, override the plugin row in the profile's `cordis.patch.yml` (`~/.dsh/profiles/web/cordis.patch.yml`):
 
@@ -172,6 +172,28 @@ npm run check
 ```
 
 Current tests cover: Git Bash path detection, argv construction, environment merging, argument validation, timeout clamping, workdir resolution, result rendering, config validation, and shell tool filtering.
+
+## Troubleshooting
+
+### Variables are empty, `for` loops print blank lines, `uname` says Linux
+
+That means `C:\Windows\System32\bash.exe` (the WSL forwarder) is running instead of Git Bash. The forwarder re-joins quoted arguments, so `$VAR`, `$(...)` and heredocs are expanded once before the real script runs.
+
+Older detection only looked for `<dir>\bash.exe` on PATH, but Git for Windows puts `<GitRoot>\cmd` on PATH (`bash.exe` lives in `<GitRoot>\bin`), so detection failed and fell back to a bare `bash`. Fixed in this version:
+
+- read `HKLM\SOFTWARE\GitForWindows\InstallPath` → `<InstallPath>\bin\bash.exe`;
+- derive `<...>\bin\bash.exe` from any `<...>\cmd` PATH entry;
+- **no fallback** to a bare `bash`: the plugin now fails loudly instead of silently running WSL.
+
+If detection still misses, set `GIT_BASH` or pin `shellPath` in the profile's `cordis.patch.yml`.
+
+### "the Git-for-Windows bash runtime cannot start" under `workspace-write`
+
+The MSYS runtime cannot create its signal pipes under the write-restricted token; that is a Windows sandbox limitation. Switch the session to `danger-full-access` (or approve a one-off escalation) to use the bash tool.
+
+### Every output starts with `Active code page: 65001`
+
+That comes from `chcp.com 65001` in `~/.bashrc`, which writes to stdout. Change it to `chcp.com 65001 >/dev/null 2>&1` to silence it.
 
 ## Compatibility
 

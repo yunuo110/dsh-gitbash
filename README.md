@@ -126,7 +126,7 @@ dsh plugin --profile web add github:yunuo110/dsh-gitbash#v0.1.1
 
 ## 配置
 
-默认自动探测 Git Bash：`GIT_BASH` 环境变量 → Program Files / Program Files (x86) / ProgramW6432 / LocalAppData / Scoop → PATH（排除 System32 的 WSL bash）。
+默认自动探测 Git Bash：`GIT_BASH` 环境变量 → 注册表 `HKLM\SOFTWARE\GitForWindows\InstallPath` → Program Files / Program Files (x86) / ProgramW6432 / LocalAppData / Scoop → PATH（含 `<...>\cmd` 到 `<...>\bin\bash.exe` 的推导；排除 System32 的 WSL bash）。找不到时直接报错，不会回退到裸 `bash`。
 
 要固定路径，在 profile 自己的 `cordis.patch.yml`（`~/.dsh/profiles/web/cordis.patch.yml`）中覆盖插件行：
 
@@ -174,6 +174,28 @@ npm run check
 ```
 
 当前测试覆盖：Git Bash 路径探测、argv 构造、环境变量合并、参数校验、超时钳制、workdir 解析、结果渲染、配置校验、shell 工具过滤。
+
+## 常见问题
+
+### bash 里变量全是空的、`for` 循环打印空行、`uname` 显示 Linux
+
+说明实际跑的是 `C:\Windows\System32\bash.exe`（WSL 转发器），不是 Git Bash。该转发器会重新拼接带引号的参数，导致 `$VAR`、`$(...)`、heredoc 在真正执行前就被展开一次。
+
+旧版探测在 PATH 里只找 `<dir>\bash.exe`，而 Git for Windows 的 PATH 项是 `<GitRoot>\cmd`（`bash.exe` 在 `<GitRoot>\bin`），于是探测失败并回退到裸 `bash`。当前版本已修复：
+
+- 优先读注册表 `HKLM\SOFTWARE\GitForWindows\InstallPath` → `<InstallPath>\bin\bash.exe`；
+- PATH 中的 `<...>\cmd` 自动推导 `<...>\bin\bash.exe`；
+- **不再回退**到裸 `bash`：找不到就明确报错，避免静默跑成 WSL。
+
+若仍未命中，设置 `GIT_BASH` 或在 profile 的 `cordis.patch.yml` 里固定 `shellPath`。
+
+### `workspace-write` 下报 "the Git-for-Windows bash runtime cannot start"
+
+MSYS 运行时在写入受限令牌下无法创建信号管道，属于 Windows 沙箱限制。把该会话的沙箱切到 `danger-full-access`（或按提示允许一次提权）后即可使用。
+
+### 每次输出开头有 `Active code page: 65001`
+
+来自 `~/.bashrc` 里的 `chcp.com 65001`，其输出走的是 stdout。改成 `chcp.com 65001 >/dev/null 2>&1` 即可消除。
 
 ## 兼容性
 
