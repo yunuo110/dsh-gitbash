@@ -164,7 +164,7 @@ test('mixed-separator System32 and configured WSL bash are excluded', () => {
 test('resolveConfig accepts extra candidate lists for non-standard installs', () => {
   const env = { ProgramFiles: 'C:\\NotGit', PATH: '' }
   assert.equal(
-    candidateGitBashPaths(env, ['D:\\Custom\\Git\\bin\\bash.exe'])[1],
+    candidateGitBashPaths(env, ['D:\\Custom\\Git\\bin\\bash.exe'])[0],
     'D:\\Custom\\Git\\bin\\bash.exe',
   )
 })
