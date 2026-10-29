@@ -1,12 +1,18 @@
 name: Windows Git Bash verification
+
 on:
   push:
     branches:
       - main
-      - 'review/**'
   pull_request:
+
 permissions:
   contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: windows-latest
