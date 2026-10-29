@@ -99,7 +99,7 @@ test('actual Windows plugin execute runs Git Bash script and returns managed out
   assert.match(result.stdout.text, /loop:a/)
   assert.match(result.stdout.text, /loop:b/)
   assert.match(result.stdout.text, /heredoc:\$value/)
-  assert.match(result.stdout.text, /msystem:(MINGW|MSYS)/)
+  assert.match(result.stdout.text, /msystem:(?:MINGW(?:32|64)|MSYS|UCRT64|CLANG(?:32|64|ARM64))\b/)
   assert.equal(exec.status, 'completed')
   assert.equal(exec.observed.stdout.readFrom(0).text, result.stdout.text)
   assert.equal(exec.readOutput().delta, result.stdout.text)
@@ -110,7 +110,7 @@ test('actual Windows plugin execute runs Git Bash script and returns managed out
     command: 'printf "legacy:%s\\n" "$MSYSTEM"',
   }))
   assert.equal(legacy.exitCode, 0, legacy.stderr.text)
-  assert.match(legacy.stdout.text, /legacy:(MINGW|MSYS)/)
+  assert.match(legacy.stdout.text, /legacy:(?:MINGW(?:32|64)|MSYS|UCRT64|CLANG(?:32|64|ARM64))\b/)
   assert.equal(subprocess.spawned.length, 2)
 
   await assert.rejects(ctx.shell.execute(ctx.shell.resolve({
