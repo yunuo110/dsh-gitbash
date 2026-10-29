@@ -113,7 +113,7 @@ dsh plugin --profile web add github:yunuo110/dsh-gitbash#v0.1.1
 - 新会话或旧对话里让模型执行 shell/git 命令，例如“查看 git 状态”“运行 npm test”。
 - 模型看到的是 `bash` 工具，描述会说明它运行 Git Bash。
 - Windows 上模型看不到 `pwsh`，即使旧缓存尝试 `pwsh` 也会被拒绝并提示改用 `bash`。
-- 如果当前会话沙箱不是完全访问，第一次调用可能失败并提示升级。按提示让模型用：
+- 如果当前会话启用了文件沙箱，Git Bash 可能无法在受限令牌下启动。优先使用不需要提高权限的替代执行方式；只有在用户明确批准、理解此操作会取消相应文件隔离时，才考虑针对**单条命令**申请一次性完全访问：
   ```json
   {
     "command": "git status",
@@ -122,7 +122,7 @@ dsh plugin --profile web add github:yunuo110/dsh-gitbash#v0.1.1
     "justification": "Git Bash 无法在受限沙箱中启动，需要完全访问以执行 git 状态检查。"
   }
   ```
-  或直接在设置里把会话权限切到**完全访问**。
+  不要将整个会话的默认权限改为完全访问。批准被拒绝时不得绕过限制重试。
 
 ## 配置
 
@@ -173,7 +173,7 @@ dsh plugin --profile web add github:yunuo110/dsh-gitbash#v0.1.1
 npm run check
 ```
 
-当前测试覆盖：Git Bash 路径探测、argv 构造、环境变量合并、参数校验、超时钳制、workdir 解析、结果渲染、配置校验、shell 工具过滤。
+当前测试覆盖：Git Bash 路径探测和 WSL 排除、argv、环境、参数校验、超时及取消分类、workdir、结果渲染、执行句柄与 `run/start/execute`、沙箱门控；Windows CI 另含真实 Git Bash 的变量/循环/heredoc 烟雾测试。完整 Harness 桌面运行路径仍需在目标版本实机验证。
 
 ## 常见问题
 
@@ -191,7 +191,7 @@ npm run check
 
 ### `workspace-write` 下报 "the Git-for-Windows bash runtime cannot start"
 
-MSYS 运行时在写入受限令牌下无法创建信号管道，属于 Windows 沙箱限制。把该会话的沙箱切到 `danger-full-access`（或按提示允许一次提权）后即可使用。
+部分 Windows 受限令牌环境可能阻止 MSYS 创建运行时信号管道。这不是自动提升权限的理由。应优先使用兼容当前沙箱的替代工具；确需 Git Bash 时，仅在明确说明风险并取得用户审批后，对单条命令请求 `danger-full-access`。该模式会放宽文件系统隔离；不要默认切换整个会话。
 
 ### 每次输出开头有 `Active code page: 65001`
 
@@ -199,7 +199,7 @@ MSYS 运行时在写入受限令牌下无法创建信号管道，属于 Windows 
 
 ## 兼容性
 
-- DeepSeek Harness `0.1.2-rc.1`（兼容 `0.1.0-rc.6` 起的同一套 shell/工具 seam）
+- DeepSeek Harness `0.1.2-rc.1` 的 `run/start` 接口；另提供较新 `execute` 句柄接口，须针对实际桌面构建版本做端到端验证
 - Windows + Git for Windows（MSYS2）
 - Node.js 22.19+
 

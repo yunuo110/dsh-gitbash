@@ -111,7 +111,7 @@ This keeps a GitHub dependency in the profile instead of a local `link` dependen
 - Ask the model to run shell/git commands in a new or old conversation, e.g. "check git status" or "run npm test".
 - The model sees the `bash` tool, and its description says it runs Git Bash.
 - On Windows the model does not see `pwsh`; even if a stale cache tries `pwsh`, it is rejected and told to use `bash`.
-- If the current session sandbox is not full access, the first call may fail with an escalation hint. Have the model use:
+- If a file sandbox is active, Git Bash may fail under a restricted Windows token. Prefer an executor that works without wider access; only with explicit user approval and an understanding that file isolation is relaxed, request one-off full access for the exact command:
   ```json
   {
     "command": "git status",
@@ -120,7 +120,7 @@ This keeps a GitHub dependency in the profile instead of a local `link` dependen
     "justification": "Git Bash cannot start in the restricted sandbox; full access is required to run git status."
   }
   ```
-  Or switch the session permission to **full access** in settings.
+  Do not switch the entire session to full access by default. Never work around a denied escalation.
 
 ## Configuration
 
@@ -171,7 +171,7 @@ Only compares the original DSH configuration with this plugin:
 npm run check
 ```
 
-Current tests cover: Git Bash path detection, argv construction, environment merging, argument validation, timeout clamping, workdir resolution, result rendering, config validation, and shell tool filtering.
+Tests cover path detection/WSL exclusion, argv, environment, validation, deadline/abort classification, result formatting, executor handles and run/start/execute policy gates. Windows CI additionally runs real Git Bash variable/loop/heredoc smoke tests; end-to-end compatibility with a specific DSH desktop build still requires a live integration check.
 
 ## Troubleshooting
 
@@ -189,7 +189,7 @@ If detection still misses, set `GIT_BASH` or pin `shellPath` in the profile's `c
 
 ### "the Git-for-Windows bash runtime cannot start" under `workspace-write`
 
-The MSYS runtime cannot create its signal pipes under the write-restricted token; that is a Windows sandbox limitation. Switch the session to `danger-full-access` (or approve a one-off escalation) to use the bash tool.
+On some Windows restricted-token configurations, MSYS cannot create its runtime signal pipes. This is not a reason to automatically escalate. Prefer a tool compatible with the current sandbox; if Git Bash is essential, explain that `danger-full-access` relaxes filesystem isolation and request explicit approval for only that command. Do not disable the session sandbox by default.
 
 ### Every output starts with `Active code page: 65001`
 
@@ -197,7 +197,7 @@ That comes from `chcp.com 65001` in `~/.bashrc`, which writes to stdout. Change 
 
 ## Compatibility
 
-- DeepSeek Harness `0.1.2-rc.1` (compatible with the same shell/tool seams since `0.1.0-rc.6`)
+- DeepSeek Harness `0.1.2-rc.1` run/start seam; a newer execute handle is also provided, but exact desktop builds require end-to-end validation
 - Windows + Git for Windows (MSYS2)
 - Node.js 22.19+
 
