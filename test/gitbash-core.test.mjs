@@ -137,3 +137,34 @@ test('resolveConfig validates numbers and detects explicit shellPath', () => {
   assert.throws(() => resolveConfig({ timeoutMs: 0 }, {}, 'win32'), /timeoutMs/)
   assert.throws(() => resolveConfig({ timeoutMs: 200000, maxTimeoutMs: 100000 }, {}, 'win32'), /must not exceed/)
 })
+
+
+test('PATH cmd and usr/bin entries derive portable Git Bash candidates', () => {
+  const candidates = candidateGitBashPaths({
+    SystemRoot: 'C:\\Windows',
+    ProgramFiles: 'C:\\NoGit',
+    PATH: 'D:\\Portable\\Git\\cmd;E:/Apps/Git/usr/bin',
+  })
+  assert.ok(candidates.includes('D:\\Portable\\Git\\bin\\bash.exe'))
+  assert.ok(candidates.includes('E:/Apps/Git\\bin\\bash.exe'))
+})
+
+test('mixed-separator System32 and configured WSL bash are excluded', () => {
+  const env = {
+    SystemRoot: 'C:\\Windows',
+    GIT_BASH: 'C:/Windows/System32/bash.exe',
+    PATH: 'C:/Windows/System32;D:\\Tools',
+  }
+  const candidates = candidateGitBashPaths(env, ['C:\\Windows\\Sysnative\\bash.exe'])
+  assert.ok(!candidates.some((path) => /sys(?:tem32|native|wow64).*bash\.exe/i.test(path)))
+  assert.ok(candidates.includes('D:\\Tools\\bash.exe'))
+  assert.throws(() => detectGitBashPath('C:/WINDOWS/System32/bash.exe', env, 'win32'), /WSL bash\.exe/)
+})
+
+test('resolveConfig accepts extra candidate lists for non-standard installs', () => {
+  const env = { ProgramFiles: 'C:\\NotGit', PATH: '' }
+  assert.equal(
+    candidateGitBashPaths(env, ['D:\\Custom\\Git\\bin\\bash.exe'])[0],
+    'D:\\Custom\\Git\\bin\\bash.exe',
+  )
+})

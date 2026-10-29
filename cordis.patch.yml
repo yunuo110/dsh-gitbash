@@ -14,7 +14,7 @@
       name: dsh-gitbash
       config:
         # Leave shellPath empty for auto-detection:
-        #   GIT_BASH -> Program Files -> LocalAppData -> Scoop -> PATH.
+        #   GIT_BASH -> registry InstallPath -> Program Files -> LocalAppData -> Scoop -> PATH.
         # To pin a path: shellPath: 'C:\\Program Files\\Git\\bin\\bash.exe'
         shellPath: ''
         timeoutMs: 120000

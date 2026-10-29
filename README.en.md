@@ -111,7 +111,7 @@ This keeps a GitHub dependency in the profile instead of a local `link` dependen
 - Ask the model to run shell/git commands in a new or old conversation, e.g. "check git status" or "run npm test".
 - The model sees the `bash` tool, and its description says it runs Git Bash.
 - On Windows the model does not see `pwsh`; even if a stale cache tries `pwsh`, it is rejected and told to use `bash`.
-- If the current session sandbox is not full access, the first call may fail with an escalation hint. Have the model use:
+- If a file sandbox is active, Git Bash may fail under a restricted Windows token. Prefer an executor that works without wider access; only with explicit user approval and an understanding that file isolation is relaxed, request one-off full access for the exact command:
   ```json
   {
     "command": "git status",
@@ -120,11 +120,11 @@ This keeps a GitHub dependency in the profile instead of a local `link` dependen
     "justification": "Git Bash cannot start in the restricted sandbox; full access is required to run git status."
   }
   ```
-  Or switch the session permission to **full access** in settings.
+  Do not switch the entire session to full access by default. Never work around a denied escalation.
 
 ## Configuration
 
-By default Git Bash is auto-detected from: `GIT_BASH` env var → Program Files / Program Files (x86) / ProgramW6432 / LocalAppData / Scoop → PATH (excluding the System32 WSL bash).
+By default Git Bash is auto-detected from: `GIT_BASH` env var → registry `HKLM\SOFTWARE\GitForWindows\InstallPath` → Program Files / Program Files (x86) / ProgramW6432 / LocalAppData / Scoop → PATH (including deriving `<...>\bin\bash.exe` from a `<...>\cmd` entry; the System32 WSL bash is excluded). If nothing is found the plugin fails loudly instead of falling back to a bare `bash`.
 
 To pin a path, override the plugin row in the profile's `cordis.patch.yml` (`~/.dsh/profiles/web/cordis.patch.yml`):
 
@@ -171,11 +171,33 @@ Only compares the original DSH configuration with this plugin:
 npm run check
 ```
 
-Current tests cover: Git Bash path detection, argv construction, environment merging, argument validation, timeout clamping, workdir resolution, result rendering, config validation, and shell tool filtering.
+Tests cover path detection/WSL exclusion, argv, environment, validation, deadline/abort classification, result formatting, executor handles and run/start/execute policy gates. Windows CI additionally runs real Git Bash variable/loop/heredoc smoke tests; end-to-end compatibility with a specific DSH desktop build still requires a live integration check.
+
+## Troubleshooting
+
+### Variables are empty, `for` loops print blank lines, `uname` says Linux
+
+That means `C:\Windows\System32\bash.exe` (the WSL forwarder) is running instead of Git Bash. The forwarder re-joins quoted arguments, so `$VAR`, `$(...)` and heredocs are expanded once before the real script runs.
+
+Older detection only looked for `<dir>\bash.exe` on PATH, but Git for Windows puts `<GitRoot>\cmd` on PATH (`bash.exe` lives in `<GitRoot>\bin`), so detection failed and fell back to a bare `bash`. Fixed in this version:
+
+- read `HKLM\SOFTWARE\GitForWindows\InstallPath` → `<InstallPath>\bin\bash.exe`;
+- derive `<...>\bin\bash.exe` from any `<...>\cmd` PATH entry;
+- **no fallback** to a bare `bash`: the plugin now fails loudly instead of silently running WSL.
+
+If detection still misses, set `GIT_BASH` or pin `shellPath` in the profile's `cordis.patch.yml`.
+
+### "the Git-for-Windows bash runtime cannot start" under `workspace-write`
+
+On some Windows restricted-token configurations, MSYS cannot create its runtime signal pipes. This is not a reason to automatically escalate. Prefer a tool compatible with the current sandbox; if Git Bash is essential, explain that `danger-full-access` relaxes filesystem isolation and request explicit approval for only that command. Do not disable the session sandbox by default.
+
+### Every output starts with `Active code page: 65001`
+
+That comes from `chcp.com 65001` in `~/.bashrc`, which writes to stdout. Change it to `chcp.com 65001 >/dev/null 2>&1` to silence it.
 
 ## Compatibility
 
-- DeepSeek Harness `0.1.2-rc.1` (compatible with the same shell/tool seams since `0.1.0-rc.6`)
+- DeepSeek Harness `0.1.2-rc.1` run/start seam; a newer execute handle is also provided, but exact desktop builds require end-to-end validation
 - Windows + Git for Windows (MSYS2)
 - Node.js 22.19+
 
